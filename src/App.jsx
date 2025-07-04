@@ -6,6 +6,7 @@ import SlideViewer from './components/SlideViewer';
 import LessonList from './components/LessonList';
 import { lessons } from './data/lessons';
 
+//追加テスト
 function App() {
   const [selectedLesson, setSelectedLesson] = useState(null);
 
