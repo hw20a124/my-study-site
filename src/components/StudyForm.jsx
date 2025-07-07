@@ -1,14 +1,22 @@
-import { useState, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { db } from "../firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, doc, updateDoc } from "firebase/firestore";
 import { UserContext } from "../UserContext";
 
-const StudyForm = () => {
+const StudyForm = ({existingRecord, onCancel}) => {
   const { user } = useContext(UserContext); // 現在のログインユーザー
 
   const [title, setTitle] = useState("");
   const [memo, setMemo] = useState("");
   const [message, setMessage] = useState("");
+
+  //編集モードの場合、フォームに既存データを反映
+  useEffect(() => {
+    if (existingRecord) {
+      setTitle(existingRecord.title);
+      setMemo(existingRecord.memo);
+    }
+  }, [existingRecord]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,17 +28,29 @@ const StudyForm = () => {
     }
 
     try {
-      await addDoc(collection(db, "records"), {
-        uid: user.uid,
-        email: user.email,
-        title,
-        memo,
-        createdAt: serverTimestamp(),
-      });
+      if (existingRecord) {
+        //編集モード
+        const docRef = doc(db, "records", existingRecord.id);
+        await updateDoc(docRef, {
+          title,
+          memo,
+        });
+        setMessage("✅ 記録を更新しました！");
+        onSave?.();
+      } else {
+        //新規作成モード
+        await addDoc(collection(db, "records"), {
+          uid: user.uid,
+          email: user.email,
+          title,
+          memo,
+          createdAt: serverTimestamp(),
+        });
 
-      setTitle("");
-      setMemo("");
-      setMessage("✅ 学習記録を保存しました！");
+        setTitle("");
+        setMemo("");
+        setMessage("✅ 学習記録を保存しました！");
+      }
     } catch (error) {
       console.error("保存エラー:", error);
       setMessage("❌ 保存に失敗しました");
@@ -38,34 +58,38 @@ const StudyForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 bg-white dark:bg-gray-800 rounded shadow max-w-md mx-auto mt-6 space-y-4">
-      <h2 className="text-xl font-bold text-center">学習記録フォーム</h2>
-
+    <form onSubmit={handleSubmit}
+      className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg mb-6 transition-all"
+    >
+      <h2 className="text-lg font-bold mb-2">
+        {existingRecord ? "✏ 記録を編集" : "🆕 記録を追加"}
+      </h2>
       <input
-        type="text"
+        className="w-full p-2 mb-3 border rounded bg-white dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:outline-none focus:ring-blue-400"
         placeholder="タイトル"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        required
-        className="w-full border p-2 rounded"
       />
-
       <textarea
+        className="w-full p-2 mb-4 border rounded bg-white dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
         placeholder="メモ"
         value={memo}
         onChange={(e) => setMemo(e.target.value)}
-        required
-        className="w-full border p-2 rounded"
-      ></textarea>
-
-      <button
-        type="submit"
-        className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-      >
-        保存する
-      </button>
-
-      {message && <p className="text-center mt-2">{message}</p>}
+      />
+      <div className="flex gap-2">
+        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 shadow-md transition-colors">
+          保存 
+        </button>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="bg-gray-300 text-black px-4 py-1 rounded"
+          >
+            キャンセル
+          </button>
+        )}
+      </div>
     </form>
   );
 };

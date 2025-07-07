@@ -7,6 +7,7 @@ import { UserContext } from "../UserContext";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
 import StudyForm from "./StudyForm";
+import StudyList from "./StudyList";
 
 const Home = () => {
   const [selectedLesson, setSelectedLesson] = useState(null);
@@ -46,6 +47,8 @@ const Home = () => {
       </header>
 
       <main className="main">
+        <StudyForm />
+        <StudyList />
         {selectedLesson ? (
           <>
             <button onClick={() => setSelectedLesson(null)}>← 戻る</button>
