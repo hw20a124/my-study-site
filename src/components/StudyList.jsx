@@ -54,7 +54,7 @@ const StudyList = () => {
         onCancel={() => setEditingRecord(null)}
       />
 
-      <h2 className="text-xl font-bold mb-4 text-center">📚 学習記録一覧</h2>
+      <h2 className="text-xl font-bold mb-4 text-center text-white">📚 学習記録一覧</h2>
       {records.length === 0 && <p>記録がありません</p>}
       <ul className="space-y-2">
         {records.map(record => (

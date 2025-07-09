@@ -61,7 +61,7 @@ const StudyForm = ({existingRecord, onCancel}) => {
     <form onSubmit={handleSubmit}
       className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg mb-6 transition-all"
     >
-      <h2 className="text-lg font-bold mb-2">
+      <h2 className="text-lg font-bold mb-2 text-white">
         {existingRecord ? "✏ 記録を編集" : "🆕 記録を追加"}
       </h2>
       <input
